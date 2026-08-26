@@ -6,42 +6,60 @@ import { ChevronDown } from "lucide-react";
 import { siteConfig } from "@/config/siteConfig";
 
 export const FAQSection: React.FC = () => {
-  const [openIdx, setOpenIdx] = useState<number | null>(0);
+  const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   const toggle = (idx: number) => {
-    setOpenIdx(openIdx === idx ? null : idx);
+    setOpenIndex(openIndex === idx ? null : idx);
+  };
+
+  const schemaData = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: siteConfig.faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.answer,
+      },
+    })),
   };
 
   return (
-    <section className="py-24 bg-cream/30">
+    <section className="py-20 bg-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+      />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <span className="text-xs font-bold uppercase tracking-wider text-teal">Parent Guidance</span>
-          <h2 className="font-serif text-3xl sm:text-4xl font-bold text-navy mt-2">
+        <div className="text-center mb-14">
+          <span className="text-xs uppercase tracking-widest text-[#2A9D8F] font-bold">
+            Got Questions?
+          </span>
+          <h2 className="font-serif text-3xl sm:text-4xl font-bold text-[#102A43] mt-2">
             Frequently Asked Questions
           </h2>
         </div>
 
         <div className="space-y-4">
           {siteConfig.faqs.map((faq, idx) => {
-            const isOpen = openIdx === idx;
+            const isOpen = openIndex === idx;
             return (
               <div
                 key={idx}
-                className="bg-white rounded-2xl border border-slate-200/70 shadow-sm overflow-hidden"
+                className="border border-slate-200 rounded-2xl overflow-hidden transition-colors"
               >
                 <button
                   onClick={() => toggle(idx)}
-                  className="w-full text-left p-6 flex items-center justify-between gap-4 font-serif text-lg font-semibold text-navy focus:outline-none"
+                  className="w-full flex items-center justify-between p-5 text-left bg-slate-50/50 hover:bg-slate-50 font-serif text-base font-semibold text-[#102A43]"
                 >
                   <span>{faq.question}</span>
                   <ChevronDown
-                    className={`w-5 h-5 text-teal shrink-0 transition-transform duration-300 ${
+                    className={`w-5 h-5 text-[#2A9D8F] transition-transform duration-300 ${
                       isOpen ? "rotate-180" : ""
                     }`}
                   />
                 </button>
-
                 <AnimatePresence>
                   {isOpen && (
                     <motion.div
@@ -50,7 +68,7 @@ export const FAQSection: React.FC = () => {
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.3 }}
                     >
-                      <div className="px-6 pb-6 text-slate-600 text-sm leading-relaxed border-t border-slate-50 pt-4">
+                      <div className="p-5 pt-0 text-xs sm:text-sm text-slate-600 leading-relaxed border-t border-slate-100 bg-white">
                         {faq.answer}
                       </div>
                     </motion.div>
