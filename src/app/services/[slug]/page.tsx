@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { notFound, useParams } from "next/navigation";
+import { useParams, notFound } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
+import { CheckCircle2, ArrowLeft, ShieldCheck } from "lucide-react";
 import { siteConfig } from "@/config/siteConfig";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
-import { FloatingSocials } from "@/components/layout/FloatingSocials";
+import { Button } from "@/components/ui/Button";
 import { AppointmentModal } from "@/components/modals/AppointmentModal";
-import { CheckCircle2, ArrowRight } from "lucide-react";
 
 export default function ServiceDetailPage() {
   const params = useParams();
@@ -17,69 +17,89 @@ export default function ServiceDetailPage() {
   const service = siteConfig.services.find((s) => s.slug === slug);
 
   if (!service) {
-    notFound();
+    return (
+      <div className="py-40 text-center">
+        <h1 className="text-2xl font-bold">Service Not Found</h1>
+        <Link href="/services" className="text-[#2A9D8F] underline mt-4 inline-block">
+          Return to Services
+        </Link>
+      </div>
+    );
   }
 
   return (
-    <main className="min-h-screen bg-white">
-      <Header onOpenBooking={() => setIsModalOpen(true)} />
+    <div className="pt-28 pb-20 bg-white">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Link
+          href="/services"
+          className="inline-flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-[#2A9D8F] mb-8"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back to All Services
+        </Link>
 
-      {/* Hero Header */}
-      <section className="pt-36 pb-20 bg-cream/40">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <span className="text-xs font-bold uppercase tracking-wider text-teal bg-teal/10 px-3.5 py-1.5 rounded-full">
-            {service.targetAge}
-          </span>
-          <h1 className="font-serif text-4xl sm:text-5xl font-bold text-navy mt-4 mb-6">
-            {service.title}
-          </h1>
-          <p className="text-slate-600 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
-            {service.shortDesc}
-          </p>
-        </div>
-      </section>
-
-      {/* Detail Content */}
-      <section className="py-20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-          <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-soft">
-            <h2 className="font-serif text-2xl font-bold text-navy mb-4">Clinical Approach</h2>
-            <p className="text-slate-600 text-sm leading-relaxed mb-6">
-              Our clinical protocol for {service.title.toLowerCase()} blends evidence-based interventions with play and interactive activities. We prioritize psychological safety while building durable coping mechanisms.
+        {/* Hero Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center mb-16">
+          <div className="lg:col-span-7 space-y-4">
+            <span className="text-xs uppercase tracking-widest text-[#2A9D8F] font-bold">
+              Therapy Program
+            </span>
+            <h1 className="font-serif text-3xl sm:text-5xl font-bold text-[#102A43]">
+              {service.title}
+            </h1>
+            <p className="text-slate-600 text-base leading-relaxed">
+              {service.fullDesc}
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {[
-                "Personalized initial evaluation",
-                "Cognitive-behavioral techniques",
-                "Structured emotional regulation tools",
-                "Regular parent guidance sessions",
-              ].map((item, idx) => (
-                <div key={idx} className="flex items-center gap-3 text-xs font-semibold text-navy">
-                  <CheckCircle2 className="w-5 h-5 text-teal shrink-0" />
-                  <span>{item}</span>
-                </div>
-              ))}
+            <div className="pt-4">
+              <Button variant="primary" size="lg" onClick={() => setIsModalOpen(true)}>
+                Book Session for {service.title}
+              </Button>
             </div>
           </div>
-
-          <div className="bg-lightBlue/30 p-8 rounded-3xl border border-lightBlue flex flex-col sm:flex-row items-center justify-between gap-6">
-            <div>
-              <h3 className="font-serif text-xl font-bold text-navy">Ready to get started?</h3>
-              <p className="text-slate-600 text-xs mt-1">Schedule an initial consultation for your child.</p>
-            </div>
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="px-6 py-3 bg-teal text-white rounded-full font-medium text-xs hover:bg-teal-dark shadow-sm transition whitespace-nowrap"
-            >
-              Book Appointment
-            </button>
+          <div className="lg:col-span-5 relative h-72 sm:h-96 rounded-3xl overflow-hidden shadow-xl border-4 border-white">
+            <Image src={service.image} alt={service.title} fill className="object-cover" />
           </div>
         </div>
-      </section>
 
-      <Footer />
-      <FloatingSocials />
+        {/* Benefits & Challenges Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+          <div className="bg-[#EAF6FA]/50 rounded-2xl p-6 sm:p-8 border border-[#2A9D8F]/20">
+            <h3 className="font-serif text-xl font-bold text-[#102A43] mb-4">
+              Key Benefits & Outcomes
+            </h3>
+            <ul className="space-y-3">
+              {service.benefits.map((b, i) => (
+                <li key={i} className="flex items-start gap-3 text-xs sm:text-sm text-slate-700">
+                  <CheckCircle2 className="w-4 h-4 text-[#2A9D8F] shrink-0 mt-0.5" />
+                  <span>{b}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="bg-[#FFF9F2] rounded-2xl p-6 sm:p-8 border border-[#F7B7A3]/40">
+            <h3 className="font-serif text-xl font-bold text-[#102A43] mb-4">
+              Common Challenges Addressed
+            </h3>
+            <ul className="space-y-3">
+              {service.challenges.map((c, i) => (
+                <li key={i} className="flex items-start gap-3 text-xs sm:text-sm text-slate-700">
+                  <ShieldCheck className="w-4 h-4 text-[#F7B7A3] shrink-0 mt-0.5" />
+                  <span>{c}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* Approach Detail */}
+        <div className="bg-slate-50 rounded-3xl p-8 border border-slate-100 mb-16">
+          <h3 className="font-serif text-2xl font-bold text-[#102A43] mb-3">
+            Our Therapeutic Approach
+          </h3>
+          <p className="text-slate-600 text-sm leading-relaxed">{service.approach}</p>
+        </div>
+      </div>
       <AppointmentModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
-    </main>
+    </div>
   );
 }
