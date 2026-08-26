@@ -2,15 +2,17 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, CheckCircle2, Loader2, Calendar, Clock, User, Phone, Mail, MessageSquare } from "lucide-react";
+import { X, CheckCircle2, Loader2, Calendar } from "lucide-react";
 import { siteConfig } from "@/config/siteConfig";
 
-interface ModalProps {
+interface AppointmentModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-export const AppointmentModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
+export const AppointmentModal: React.FC<AppointmentModalProps> = ({ isOpen, onClose }) => {
+  const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const [formData, setFormData] = useState({
     parentName: "",
     childName: "",
@@ -18,35 +20,26 @@ export const AppointmentModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     phone: "",
     email: "",
     preferredDate: "",
-    preferredTime: "Morning",
+    preferredTime: "Morning (9 AM - 12 PM)",
     primaryConcern: siteConfig.services[0].title,
     message: "",
   });
-
-  const [status, setStatus] = useState<"idle" | "submitting" | "success">("idle");
-  const [errorMessage, setErrorMessage] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.parentName || !formData.phone || !formData.childName) {
-      setErrorMessage("Please fill out all required fields.");
-      return;
-    }
-    
-    setErrorMessage("");
-    setStatus("submitting");
-
-    // Simulate server response delay
-    await new Promise((resolve) => setTimeout(resolve, 1200));
-    setStatus("success");
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      setSubmitted(true);
+    }, 1200);
   };
 
   const resetAndClose = () => {
-    setStatus("idle");
+    setSubmitted(false);
     onClose();
   };
 
@@ -54,91 +47,82 @@ export const AppointmentModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
-          {/* Dark Translucent Backdrop */}
+          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={resetAndClose}
-            className="fixed inset-0 bg-navy/60 backdrop-blur-md"
+            className="fixed inset-0 bg-[#102A43]/70 backdrop-blur-md"
           />
 
-          {/* Modal Card */}
+          {/* Modal Container */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 15 }}
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 15 }}
-            transition={{ type: "spring", duration: 0.4 }}
-            className="relative w-full max-w-2xl bg-white rounded-3xl shadow-cardHover overflow-hidden z-10 my-8 border border-cream"
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            transition={{ type: "spring", duration: 0.5 }}
+            className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl z-10 overflow-hidden my-8"
           >
-            {/* Header */}
-            <div className="bg-gradient-to-r from-navy to-navy-light text-white p-6 sm:p-8 pr-12 relative">
+            {/* Header Banner */}
+            <div className="bg-[#102A43] text-white p-6 sm:p-8 relative">
               <button
                 onClick={resetAndClose}
-                className="absolute top-6 right-6 text-white/80 hover:text-white p-2 rounded-full hover:bg-white/10 transition"
+                className="absolute top-5 right-5 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 p-2 rounded-full transition-colors"
                 aria-label="Close modal"
               >
-                <X className="w-6 h-6" />
+                <X className="w-5 h-5" />
               </button>
-              <h3 className="font-serif text-2xl sm:text-3xl font-semibold leading-snug">
+              <span className="text-xs uppercase tracking-widest text-[#2A9D8F] font-bold">
+                Private Consultation
+              </span>
+              <h3 className="font-serif text-2xl sm:text-3xl font-bold mt-1 text-[#FFF9F2]">
                 Let's Take the First Step Together
               </h3>
-              <p className="text-lightBlue text-sm sm:text-base mt-2">
-                Tell us a little about your child and our clinical team will contact you directly.
+              <p className="text-xs sm:text-sm text-slate-300 mt-2">
+                Tell us a little about your child and our intake team will reach out to confirm your session.
               </p>
             </div>
 
-            {/* Body */}
+            {/* Content Body */}
             <div className="p-6 sm:p-8 max-h-[75vh] overflow-y-auto">
-              {status === "success" ? (
-                <div className="text-center py-10 space-y-4">
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="w-16 h-16 bg-teal/10 text-teal rounded-full flex items-center justify-center mx-auto"
-                  >
+              {submitted ? (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-[#2A9D8F]/10 text-[#2A9D8F] rounded-full flex items-center justify-center mx-auto mb-4">
                     <CheckCircle2 className="w-10 h-10" />
-                  </motion.div>
-                  <h4 className="font-serif text-2xl font-bold text-navy">Thank You!</h4>
-                  <p className="text-slate-600 max-w-md mx-auto">
-                    Your appointment request has been received. Our team will contact you shortly to confirm session scheduling.
+                  </div>
+                  <h4 className="font-serif text-2xl font-bold text-[#102A43]">
+                    Thank You!
+                  </h4>
+                  <p className="text-slate-600 mt-2 max-w-md mx-auto text-sm sm:text-base">
+                    Your appointment request has been received. Our clinical coordinator will contact you shortly via phone/email.
                   </p>
                   <button
                     onClick={resetAndClose}
-                    className="mt-6 px-8 py-3 bg-teal text-white rounded-full font-medium hover:bg-teal-dark transition shadow-md"
+                    className="mt-6 bg-[#102A43] text-white px-8 py-3 rounded-full font-medium hover:bg-[#0c2136] transition-colors text-sm"
                   >
                     Done
                   </button>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
-                  {errorMessage && (
-                    <div className="p-3 bg-red-50 text-red-700 text-sm rounded-xl">
-                      {errorMessage}
-                    </div>
-                  )}
-
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-semibold uppercase tracking-wider text-navy mb-1">
+                      <label className="block text-xs font-semibold text-[#102A43] uppercase mb-1">
                         Parent / Guardian Name *
                       </label>
-                      <div className="relative">
-                        <User className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
-                        <input
-                          type="text"
-                          name="parentName"
-                          required
-                          value={formData.parentName}
-                          onChange={handleChange}
-                          placeholder="Jane Doe"
-                          className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal/50 text-navy text-sm"
-                        />
-                      </div>
+                      <input
+                        type="text"
+                        name="parentName"
+                        required
+                        value={formData.parentName}
+                        onChange={handleChange}
+                        placeholder="e.g. Eleanor Vance"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#2A9D8F] focus:ring-2 focus:ring-[#2A9D8F]/20 outline-none text-sm"
+                      />
                     </div>
-
                     <div>
-                      <label className="block text-xs font-semibold uppercase tracking-wider text-navy mb-1">
+                      <label className="block text-xs font-semibold text-[#102A43] uppercase mb-1">
                         Child's Name *
                       </label>
                       <input
@@ -147,124 +131,136 @@ export const AppointmentModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                         required
                         value={formData.childName}
                         onChange={handleChange}
-                        placeholder="Leo"
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal/50 text-navy text-sm"
+                        placeholder="e.g. Leo Vance"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#2A9D8F] focus:ring-2 focus:ring-[#2A9D8F]/20 outline-none text-sm"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-xs font-semibold uppercase tracking-wider text-navy mb-1">
-                        Child's Age
+                      <label className="block text-xs font-semibold text-[#102A43] uppercase mb-1">
+                        Child's Age *
                       </label>
                       <input
                         type="number"
                         name="childAge"
+                        required
                         min="2"
                         max="18"
                         value={formData.childAge}
                         onChange={handleChange}
-                        placeholder="7"
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal/50 text-navy text-sm"
+                        placeholder="Age (2-18)"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#2A9D8F] focus:ring-2 focus:ring-[#2A9D8F]/20 outline-none text-sm"
                       />
                     </div>
-
                     <div>
-                      <label className="block text-xs font-semibold uppercase tracking-wider text-navy mb-1">
+                      <label className="block text-xs font-semibold text-[#102A43] uppercase mb-1">
                         Phone Number *
                       </label>
-                      <div className="relative">
-                        <Phone className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
-                        <input
-                          type="tel"
-                          name="phone"
-                          required
-                          value={formData.phone}
-                          onChange={handleChange}
-                          placeholder="+91 98765 43210"
-                          className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal/50 text-navy text-sm"
-                        />
-                      </div>
+                      <input
+                        type="tel"
+                        name="phone"
+                        required
+                        value={formData.phone}
+                        onChange={handleChange}
+                        placeholder="+91 98765 43210"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#2A9D8F] focus:ring-2 focus:ring-[#2A9D8F]/20 outline-none text-sm"
+                      />
                     </div>
-
                     <div>
-                      <label className="block text-xs font-semibold uppercase tracking-wider text-navy mb-1">
-                        Email Address
+                      <label className="block text-xs font-semibold text-[#102A43] uppercase mb-1">
+                        Email Address *
                       </label>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
-                        <input
-                          type="email"
-                          name="email"
-                          value={formData.email}
-                          onChange={handleChange}
-                          placeholder="parent@example.com"
-                          className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal/50 text-navy text-sm"
-                        />
-                      </div>
+                      <input
+                        type="email"
+                        name="email"
+                        required
+                        value={formData.email}
+                        onChange={handleChange}
+                        placeholder="parent@example.com"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#2A9D8F] focus:ring-2 focus:ring-[#2A9D8F]/20 outline-none text-sm"
+                      />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-semibold uppercase tracking-wider text-navy mb-1">
-                        Preferred Date
+                      <label className="block text-xs font-semibold text-[#102A43] uppercase mb-1">
+                        Preferred Date *
                       </label>
                       <input
                         type="date"
                         name="preferredDate"
+                        required
                         value={formData.preferredDate}
                         onChange={handleChange}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal/50 text-navy text-sm"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#2A9D8F] focus:ring-2 focus:ring-[#2A9D8F]/20 outline-none text-sm"
                       />
                     </div>
-
                     <div>
-                      <label className="block text-xs font-semibold uppercase tracking-wider text-navy mb-1">
-                        Primary Concern
+                      <label className="block text-xs font-semibold text-[#102A43] uppercase mb-1">
+                        Preferred Time Slot
                       </label>
                       <select
-                        name="primaryConcern"
-                        value={formData.primaryConcern}
+                        name="preferredTime"
+                        value={formData.preferredTime}
                         onChange={handleChange}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal/50 text-navy text-sm bg-white"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#2A9D8F] focus:ring-2 focus:ring-[#2A9D8F]/20 outline-none text-sm bg-white"
                       >
-                        {siteConfig.services.map((s) => (
-                          <option key={s.id} value={s.title}>
-                            {s.title}
-                          </option>
-                        ))}
+                        <option>Morning (9 AM - 12 PM)</option>
+                        <option>Afternoon (12 PM - 4 PM)</option>
+                        <option>Evening (4 PM - 7 PM)</option>
                       </select>
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-navy mb-1">
-                      Additional Message or Notes
+                    <label className="block text-xs font-semibold text-[#102A43] uppercase mb-1">
+                      Primary Concern
+                    </label>
+                    <select
+                      name="primaryConcern"
+                      value={formData.primaryConcern}
+                      onChange={handleChange}
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#2A9D8F] focus:ring-2 focus:ring-[#2A9D8F]/20 outline-none text-sm bg-white"
+                    >
+                      {siteConfig.services.map((srv) => (
+                        <option key={srv.slug} value={srv.title}>
+                          {srv.title}
+                        </option>
+                      ))}
+                      <option value="General Consultation">General Consultation / Unsure</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-[#102A43] uppercase mb-1">
+                      Additional Details
                     </label>
                     <textarea
                       name="message"
                       rows={3}
                       value={formData.message}
                       onChange={handleChange}
-                      placeholder="Share any specific observations or preferences..."
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal/50 text-navy text-sm"
+                      placeholder="Share any background details or specific concerns..."
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#2A9D8F] focus:ring-2 focus:ring-[#2A9D8F]/20 outline-none text-sm resize-none"
                     />
                   </div>
 
                   <button
                     type="submit"
-                    disabled={status === "submitting"}
-                    className="w-full py-3.5 bg-teal text-white rounded-xl font-semibold hover:bg-teal-dark transition duration-200 shadow-md flex items-center justify-center gap-2 mt-4"
+                    disabled={loading}
+                    className="w-full mt-2 bg-[#2A9D8F] hover:bg-[#238377] text-white py-3.5 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#2A9D8F]/25 text-sm"
                   >
-                    {status === "submitting" ? (
+                    {loading ? (
                       <>
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                        Processing Request...
+                        <Loader2 className="w-4 h-4 animate-spin" /> Submitting Request...
                       </>
                     ) : (
-                      "Request Appointment"
+                      <>
+                        <Calendar className="w-4 h-4" /> Request Appointment
+                      </>
                     )}
                   </button>
                 </form>
