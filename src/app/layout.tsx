@@ -1,78 +1,41 @@
-import type { Metadata } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
-import "./globals.css";
-import { siteConfig } from "@/config/siteConfig";
+"use client";
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
-});
+import React, { useState } from "react";
+import { Playfair_Display, Inter } from "next/font/google";
+import "@/app/globals.css";
+import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
+import { FloatingSocials } from "@/components/layout/FloatingSocials";
+import { AppointmentModal } from "@/components/modals/AppointmentModal";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
   variable: "--font-playfair",
-  display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: `${siteConfig.name} | Premium Child Psychology Clinic`,
-    template: `%s | ${siteConfig.name}`,
-  },
-  description: siteConfig.tagline,
-  openGraph: {
-    title: siteConfig.name,
-    description: siteConfig.tagline,
-    url: "https://mindfulbeginnings.com",
-    siteName: siteConfig.name,
-    locale: "en_US",
-    type: "website",
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-};
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "MedicalBusiness",
-    "name": siteConfig.name,
-    "description": siteConfig.tagline,
-    "telephone": siteConfig.contact.phone,
-    "email": siteConfig.contact.email,
-    "address": {
-      "@type": "PostalAddress",
-      "streetAddress": siteConfig.contact.address.street,
-      "addressLocality": siteConfig.contact.address.city,
-      "addressRegion": siteConfig.contact.address.state,
-      "postalCode": siteConfig.contact.address.zip,
-      "addressCountry": siteConfig.contact.address.country,
-    },
-    "geo": {
-      "@type": "GeoCoordinates",
-      "latitude": siteConfig.googleMaps.latitude,
-      "longitude": siteConfig.googleMaps.longitude,
-    },
-    "openingHours": "Mo-Sa 09:00-18:30",
-  };
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
-    <html lang="en" className={`${inter.variable} ${playfair.variable} scroll-smooth`}>
+    <html lang="en" className={`${playfair.variable} ${inter.variable} scroll-smooth`}>
       <head>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        <title>Mindful Beginnings | Child & Family Therapy Clinic</title>
+        <meta
+          name="description"
+          content="Compassionate, evidence-based child psychology and therapy services designed to help children heal, grow, and thrive."
         />
       </head>
-      <body className="font-sans bg-white text-navy antialiased selection:bg-teal/20 selection:text-teal-dark">
-        {children}
+      <body className="font-sans antialiased bg-white text-[#102A43] selection:bg-[#2A9D8F]/20">
+        <Header onOpenAppointment={() => setIsModalOpen(true)} />
+        <main className="min-h-screen">{children}</main>
+        <Footer />
+        <FloatingSocials />
+        <AppointmentModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
       </body>
     </html>
   );
